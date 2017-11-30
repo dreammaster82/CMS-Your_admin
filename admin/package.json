@@ -5,7 +5,7 @@
   "licenses": "MIT",
   "author": "Денис Михайлюков",
   "scripts": {
-    "devserver": "webpack-dev-server --env.development --env.restApi=/api --env.appId=api_id --env.appSecret=secret_word"
+    "devserver": "webpack-dev-server --env.development"
   },
   "dependencies": {
     "babel-core": "^6.25.0",
