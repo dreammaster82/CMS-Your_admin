@@ -43,28 +43,31 @@ function AdminContent({loading, user, modules, errors, login, closeDialog, setEr
     }
 
     let content = null;
-    if (modules && modules.length) {
-        content = user ? <div>
+    if (user) {
+        if (modules && modules.length) {
+            content = <div>
             <Route exact path="/" render={() => {
                 return <div className="login-content">
                     Добро пожаловать в систему администривания <br /> "Ваша админка" <br />
-                    Служба поддержки: <a href="mailto:info@woostudio.ru">info@woostudio.ru</a>
+                Служба поддержки: <a href="mailto:info@woostudio.ru">info@woostudio.ru</a>
                 </div>;
             }} />
-            <Route path="/:moduleId" render={(matchObj) => {
+        <Route path="/:moduleId" render={(matchObj) => {
                 module = modules.find(module => module.id == matchObj.match.params.moduleId);
                 if (!module) {
                     loading = true;
                     return null;
                 } else return <ModuleView module={module} setErrors={setErrors} />;
             }} />
-            <Dialog actions={<FlatButton
-                label={close}
-                primary={true}
-                onClick={closeModal}
-            />} open={errors.length} onRequestClose={closeModal}>{errors.map((err, index) => <div key={index}>{err.message}</div>)}</Dialog>
-        </div> : <LoginForm login={login} errors={errors} />;
-    } else loading = false;
+        <Dialog actions={<FlatButton
+            label={close}
+            primary={true}
+            onClick={closeModal}
+                />} open={errors.length} onRequestClose={closeModal}>{errors.map((err, index) => <div key={index}>{err.message}</div>)}</Dialog>
+            </div>;
+        } else loading = false;
+    } else content = <LoginForm login={login} errors={errors} />;
+
 
     return (<MuiThemeProvider muiTheme={muiTheme}><section className="content"><Loader loaded={!loading}>{content}</Loader></section></MuiThemeProvider>);
 }
