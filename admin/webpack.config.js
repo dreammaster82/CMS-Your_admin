@@ -4,8 +4,10 @@
  */
 const path = require('path'),
 	webpack = require('webpack'),
-	currentPath = path.resolve(__dirname);
+	currentPath = path.resolve(__dirname),
+	envJson = require('../config/env.json');
 
+const processEnv = Object.assign({}, process.env, envJson);
 const config = [{
 	entry: {
 		app: './js/index.js'
@@ -79,9 +81,9 @@ module.exports = function(env) {
 	}
 	config[0].plugins.push(
         new webpack.DefinePlugin({
-            REST_API: JSON.stringify(env.restApi || process.env.restApi),
-			APP_ID: JSON.stringify(env.appId || process.env.appId),
-            APP_SECRET: JSON.stringify(env.appSecret || process.env.appSecret)
+            REST_API: JSON.stringify(env.restApi || processEnv.restApi),
+			APP_ID: JSON.stringify(env.appId || processEnv.appId),
+            APP_SECRET: JSON.stringify(env.appSecret || processEnv.appSecret)
         })
 	);
 
