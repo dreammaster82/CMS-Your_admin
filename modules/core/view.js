@@ -34,7 +34,6 @@ export default class Core extends React.Component {
                 {this.generateBreadcrumbs()}
                 <div className="module-content">
                     {this.getContent()}
-                    {this.state.error && <div className="alert alert-danger" role="alert">{this.state.error}</div>}
                 </div>
             </div>);
     }

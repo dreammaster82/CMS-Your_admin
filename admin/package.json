@@ -13,6 +13,7 @@
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-preset-env": "^1.6.0",
     "babel-preset-react": "^6.24.1",
+    "clean-webpack-plugin": "^0.1.17",
     "cropperjs": "^1.1.0",
     "css-loader": "^0.28.4",
     "draft-js": "^0.10.2",
@@ -35,7 +36,8 @@
     "redux": "^3.7.2",
     "style-loader": "^0.18.2",
     "url-loader": "^0.5.9",
-    "webpack": "^3.4.1"
+    "webpack": "^3.4.1",
+    "workbox-webpack-plugin": "^2.1.2"
   },
   "devDependencies": {
     "webpack-dev-server": "^2.6.1"

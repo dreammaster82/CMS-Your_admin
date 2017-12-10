@@ -219,7 +219,10 @@ class Users extends Core {
         this.setState({loading: true});
         User.getAll().then(users => {
             this.setState({users: users, loading: false});
-        }).catch(err => this.setState({error: err.message || 'Loading error', loading: false}));
+        }).catch(err => {
+            this.props.dispatch({type: ERRORS, errors: [err]})
+            this.setState({loading: false});
+        });
     }
 
     /**
@@ -272,7 +275,6 @@ class Users extends Core {
         let state = {};
         if (nextProps.users && nextProps.users != this.state.users) state.users = nextProps.users;
         if (nextProps.loading && nextProps.loading != this.state.loading) state.loading = nextProps.loading;
-        if (nextProps.errors && nextProps.errors != this.state.errors) state.errors = nextProps.errors;
         if (Object.keys(state).length) this.setState(state);
     }
 
@@ -327,6 +329,6 @@ class Users extends Core {
 }
 ;
 
-export default withRouter(connect(({loading, user, errors}) => {
-    return {loading, user, errors};
+export default withRouter(connect(({loading, user}) => {
+    return {loading, user};
 })(Users));

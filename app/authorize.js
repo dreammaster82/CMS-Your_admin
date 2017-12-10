@@ -22,7 +22,7 @@ module.exports = function(db) {
         try {
             if (!db) throw Error('No connection');
 
-            if (req.query.type && req.query.id == APP_ID && req.query.secret == APP_SECRET) {
+            if (req.query.type && req.query.id == APP_ID) {
                 if (req.query.type == 'token') {
                     if (!req.query.token) throw new Error('No token');
                     User.findOne({attributes: ['id', 'login', 'permissions', 'token', 'ref_token'], where: {token: req.query.token}}).then(user => {
@@ -45,16 +45,22 @@ module.exports = function(db) {
                         next(err);
                     });
                 } else if (req.query.type == 'login') {
-                    if (!req.query.data) throw new Error('No login && password');
+                    if (!req.query.data && !req.query.login) throw new Error('No login && password');
 
-                    // Декодируем пришедшие авторизационные данные
-                    let secToKey = APP_SECRET > 16 ? APP_SECRET.slice(0, 15) : APP_SECRET + 'a'.repeat(16 - APP_SECRET.length),
-                        deCipher = crypto.createDecipheriv('aes128', secToKey, secToKey),
-                        decrypted = deCipher.update(utils.str2ab(req.query.data), 'utf8', 'utf8');
+                    let login, password;
+                    if (req.query.login) { // не включен tsl
+                        ({login, password} = req.query);
+                    } else {
+                        // Декодируем пришедшие авторизационные данные
+                        let secToKey = APP_SECRET > 16 ? APP_SECRET.slice(0, 15) : APP_SECRET + 'a'.repeat(16 - APP_SECRET.length),
+                            deCipher = crypto.createDecipheriv('aes128', secToKey, secToKey),
+                            decrypted = deCipher.update(utils.str2ab(req.query.data), 'utf8', 'utf8');
 
-                    decrypted += deCipher.final('utf8');
-                    let [login, ...passArr] = decrypted.split(':'),
+                        decrypted += deCipher.final('utf8');
+                        let passArr;
+                        [login, ...passArr] = decrypted.split(':');
                         password = passArr.join('');
+                    }
 
                     if (!login || !password) throw new Error('Not correct login && password');
 

@@ -5,7 +5,9 @@
 const path = require('path'),
 	webpack = require('webpack'),
 	currentPath = path.resolve(__dirname),
-	envJson = require('../config/env.json');
+	envJson = require('../config/env.json'),
+    cleanPlugin = require('clean-webpack-plugin'),
+    workboxPlugin = require('workbox-webpack-plugin');
 
 const processEnv = Object.assign({}, process.env, envJson);
 const config = [{
@@ -67,17 +69,27 @@ module.exports = function(env) {
 			historyApiFallback: {
 				index: '/admin/'
 			},
-			https: true,
+			https: false,
 			headers: {
 				'Access-Control-Allow-Origin': '*'
 			},
 			host: 'devserver.ts',
-			port: 80,
             publicPath: '/admin/',
 			proxy: {
 				'/api': 'http://localhost:3000'
             }
 		};
+	} else {
+		config[0].plugins.push(
+			new cleanPlugin(['build']),
+            new workboxPlugin({
+                globDirectory: 'build',
+                globPatterns: ['**/*.{html,js}'],
+                swDest: path.join('build', 'sw.js'),
+                clientsClaim: true,
+                skipWaiting: true,
+            })
+		);
 	}
 	config[0].plugins.push(
         new webpack.DefinePlugin({

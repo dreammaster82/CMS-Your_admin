@@ -22,20 +22,22 @@ import Authorize from './authorize';
 import AdminContent from './adminContent';// eslint-disable-line
 import AdminMenu from './adminMenu';// eslint-disable-line
 import Info from './Info';// eslint-disable-line
-
+import './lib/offline';
 
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./js/sw.js', { insecure: true }).then(function(reg) {
-        console.log('Registration succeeded. Scope is ' + reg.scope);
-    }).catch(function(error) {
-        console.log('Registration failed with ' + error);
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(registration => {
+            console.log('SW registered: ', registration);
+        }).catch(registrationError => {
+            console.log('SW registration failed: ', registrationError);
+        });
     });
 }
 
 injectTapEventPlugin();
 initTranslator(translatorObj);
 
-const store = createStore(reducers, {loading: true, errors: []});
+const store = createStore(reducers, {loading: true, errors: [], online: false});
 
 store.subscribe(() => {
     let state = store.getState();
@@ -49,11 +51,30 @@ store.subscribe(() => {
 });
 
 Authorize.init(appId, appSecret); // Иницилизируем авторизацию
-// Попыка авториации по сохраненым токенам
-Authorize.authorize().then(() => {
-    store.dispatch({type: null, loading: false, user: Authorize.user, online: true});
-}).catch(err => {
-    store.dispatch({type: null, loading: false, errors: [...store.getState().errors, err]});
+
+// Проверка на онлайн/оффлайн
+Offline.options.checks = {xhr: {url: REST_API + '/ping'}};
+Offline.on('up', () => {
+    if (!store.getState().online) store.dispatch({type: null, online: true});
+    if (!Authorize.user) {
+        // Попыка авториации по сохраненым токенам
+        Authorize.authorize().then(() => {
+            store.dispatch({type: null, loading: false, user: Authorize.user});
+        }).catch(err => {
+            if (err.message != 'Авторизация уже запущена') {
+                store.dispatch({type: null, loading: false});
+            }
+            console.warn(err);
+        });
+    }
+});
+Offline.on('down', () => {
+    if (store.getState().online) store.dispatch({type: null, online: false});
+});
+Offline.check().then(() => {
+    Offline.trigger('up');
+}).catch(() => {
+    Offline.trigger('down');
 });
 
 /**

@@ -484,8 +484,10 @@ class ContentView extends Core {
                     });
                     this.setState(state);
                 }).catch(err => {
+                    let state = {loading: false, items: this.state.items};
+                    state.items[id] = {item: {id: id}, children: []};
                     this.props.dispatch({type: ERRORS, errors: [err]});
-                    this.setState({loading: false});
+                    this.setState(state);
                 });
                 return null;
             } else {
