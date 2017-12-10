@@ -14,6 +14,10 @@ module.exports = function(db) {
         }
     });
 
+    router.get('/api/ping', function (req, res, next) {
+        res.send('ok');
+    });
+
     router.get('/api/getModules', function (req, res, next) {
         let permissions = req.session && req.session.user ? req.session.user.permissions : {},
             correctModules = Object.entries(modules).filter(function(entrie) {
